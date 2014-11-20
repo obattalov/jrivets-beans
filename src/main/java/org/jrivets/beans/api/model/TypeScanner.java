@@ -2,6 +2,7 @@ package org.jrivets.beans.api.model;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,32 +46,36 @@ public final class TypeScanner {
      * Scans provided class and its super-classes also.
      */
     private TypeDetails scanType(Class<?> clazz) {
-        logger.info("Scanning class ", clazz);
-        Map<String, Attribute> attributes = new HashMap<>();
-        Class<?> clz = clazz;
-        while (clz != null) {
-            scanFields(clz, attributes);
-            scanMethods(clz, attributes);
-            clz = clz.getSuperclass();
+        logger.info("*** Scanning ", clazz);
+        try {
+            Map<String, Attribute> attributes = new HashMap<>();
+            Class<?> clz = clazz;
+            while (clz != null) {
+                scanFields(clz, attributes);
+                scanMethods(clz, attributes);
+                clz = clz.getSuperclass();
+            }
+    
+            if (attributes.size() == 0) {
+                logger.warn("No interface annotations for class ", clazz);
+                return null;
+            }
+            return new TypeDetails(attributes);
+        } finally {
+            logger.info("*** Done with ", clazz);
         }
-
-        if (attributes.size() == 0) {
-            logger.warn("No interface annotations for class ", clazz);
-            return null;
-        }
-        return new TypeDetails(attributes);
     }
 
     private void scanFields(Class<?> clazz, Map<String, Attribute> attributes) {
         Field[] fields = clazz.getDeclaredFields();
-        logger.debug("Scanning class(", clazz, ") fields...");
+        logger.debug("Scanning fields of ", clazz.getSimpleName());
         if (fields != null) {
             for (Field f: fields) {
                 if (!f.isAnnotationPresent(Property.class)) {
                     continue;
                 }
                 
-                logger.debug("Found field=", f, " annotated by @Property");
+                logger.debug("Found field=", f.getType(), " ", f.getName(), " annotated by @Property");
                 String propName = f.getName();
                 PropertyAttribute mpa = createMethodProperty(attributes.get(propName), propName, clazz);
                 mpa.setField(f);
@@ -81,7 +86,7 @@ public final class TypeScanner {
 
     private void scanMethods(Class<?> clazz, Map<String, Attribute> attributes) {
         Method[] methods = clazz.getDeclaredMethods();
-        logger.debug("Scanning class(", clazz, ") methods...");
+        logger.debug("Scanning methods of ", clazz.getSimpleName());
         if (methods != null) {
             for (Method m: methods) {
                 boolean op = m.isAnnotationPresent(Operation.class);
@@ -93,13 +98,13 @@ public final class TypeScanner {
 
                 String name = m.getName().trim().toLowerCase();
                 if (op) {
-                    logger.debug("Found method m=", m, " annotated by @Operation");
+                    logger.debug("Found method m=", m.getName(), "(", Arrays.toString(m.getParameters()), ") annotated by @Operation");
                     assertUniqueName(attributes, name);
                     attributes.put(name, new OperationAttribute(clazz, m));
                 }
 
                 if (prop) {
-                    logger.debug("Found method m=", m, " annotated by @Property");
+                    logger.debug("Found method m=", m.getName(), "(", Arrays.toString(m.getParameters()), ") annotated by @Property");
                     String propName = propertyName(name);
                     PropertyAttribute mpa = createMethodProperty(attributes.get(propName), propName, clazz);
                     setPropertyMethod(mpa, m, name, propName);

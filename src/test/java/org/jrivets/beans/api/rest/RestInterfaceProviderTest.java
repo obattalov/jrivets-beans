@@ -9,11 +9,25 @@ public class RestInterfaceProviderTest {
 
     static class Master {
         @Property int i;
+        
+        private Detail d;
+        
         @Operation Detail getDetails(int a) {
-            return new Detail();
+            if (a < 0) {
+                return null;
+            }
+            return d == null ? (d = new Detail()) : d;
         }
         @Operation Details2 getDetails2(String b, int a) {
             return new Details2();
+        }
+        
+        @Operation String getData(int i, String s, Detail d) {
+            return i + s + d.name;
+        }
+        
+        @Operation String noArgs() {
+            return "hello";
         }
     }
     

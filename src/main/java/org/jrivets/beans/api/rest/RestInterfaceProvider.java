@@ -1,6 +1,7 @@
 package org.jrivets.beans.api.rest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,8 @@ public final class RestInterfaceProvider {
     final Logger logger = LoggerFactory.getLogger(RestInterfaceProvider.class);
 
     final Model model;
+    
+    final String resPrefix;
 
     final Lock lock = new ReentrantLock();
 
@@ -42,9 +45,15 @@ public final class RestInterfaceProvider {
 
     private final static String CT_APP_JSON = "application/json";
     
+    private final static int STATUS_OK = 200;
+    
+    private final static int STATUS_BAD_REQUEST = 400;
+    
     private final static int STATUS_NOT_FOUND = 404;
     
-    private final static int STATUS_OK = 200;
+    public final static int DEFAULT_PORT = 9009;
+    
+    public final static String RES_PREFIX = "/management";
 
     private static class RootResource {
 
@@ -85,12 +94,19 @@ public final class RestInterfaceProvider {
     }
 
     public RestInterfaceProvider(Model model) {
+        this(model, DEFAULT_PORT, RES_PREFIX);
+    }
+    
+    public RestInterfaceProvider(Model model, int port, String resourcePrefix) {
         this.model = model;
+        this.resPrefix = correctResourcePrefix(resourcePrefix);
+        setPort(port);
     }
 
     public <T> boolean register(T object, String name) {
         lock.lock();
         try {
+            name = name.toLowerCase().trim();
             if (rootResources.containsKey(name)) {
                 onError("The name \"" + name + "\" has already registered resource.");
             }
@@ -100,7 +116,7 @@ public final class RestInterfaceProvider {
             }
             RootResource rr = new RootResource(resource, object);
             rootResources.put(name, rr);
-            registerIntfcForRR("/" + name, rr);
+            registerIntfcForRR(resPrefix + name, rr);
         } finally {
             lock.unlock();
         }
@@ -170,7 +186,7 @@ public final class RestInterfaceProvider {
     }
 
     private void registerIntfcForEP(EndpointHolder eph, Endpoint ep) {
-        eph.path += "/" + ep.attribute.getName();
+        eph.path += "/" + ep.attribute.getName().toLowerCase();
         switch (ep.method) {
         case GET:
             logger.info("register GET ", eph.path);
@@ -201,7 +217,7 @@ public final class RestInterfaceProvider {
     private String getArgName(int idx) {
         return "arg" + idx;
     }
-
+  
     private Object invoke(Request req, Response res, RootResource rootResource, Endpoint rootEndpoint) {
         logger.info(req.requestMethod(), " to ", req.url());
         logger.debug("body=", req.body());
@@ -213,7 +229,8 @@ public final class RestInterfaceProvider {
             argIdx += m.getParameterCount();
             o = MethodInvoker.invoke(o, m, params);
             if (o == null) {
-                halt(STATUS_NOT_FOUND, "Empty object when invoking method " + m.getName() + " with args=" + params);
+                logger.warn("No object in the chain when calling ", m.getName(), "() with params ", Arrays.toString(params));
+                halt(STATUS_NOT_FOUND, "Empty object when invoking method " + m.getName() + "() with args=" + Arrays.toString(params));
             }
             rootEndpoint = rootEndpoint.nextEndpoint;
         }
@@ -227,7 +244,7 @@ public final class RestInterfaceProvider {
             return "";
         case POST: 
             java.lang.reflect.Method m = ((OperationAttribute) rootEndpoint.attribute).getMethod();
-            String[] params = JsonSerializer.fromJson(req.body(), String[].class);
+            String[] params = getPostParams(req.body());
             o = MethodInvoker.invoke(o, m, params);
             return o;
         default: break;
@@ -237,9 +254,30 @@ public final class RestInterfaceProvider {
 
     private String[] getPathParams(Request req, int count, int startIdx) {
         String[] params = new String[count];
-        for (int idx = 0; idx < count; idx++) {
-            params[idx] = req.params(getArgName(startIdx++));
+        try {
+            for (int idx = 0; idx < count; idx++) {
+                params[idx] = req.params(getArgName(startIdx++));
+            }
+        } catch (Exception e) {
+            halt(STATUS_BAD_REQUEST, "Cannot parse path parameters " + e);
         }
         return params;
+    }
+    
+    private String[] getPostParams(String body) {
+        try {
+            String[] result = JsonSerializer.fromJson(body, String[].class);
+            return result == null ? new String[0] : result;
+        } catch (Exception e) {
+            halt(STATUS_BAD_REQUEST, "Cannot parse POST parameters " + e);
+        }
+        return null;
+    }
+
+    private String correctResourcePrefix(String resourcePrefix) {
+        if (resourcePrefix == null) {
+            resourcePrefix = "";
+        }
+        return resourcePrefix + "/";
     }
 }

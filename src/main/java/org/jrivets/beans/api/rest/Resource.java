@@ -10,5 +10,4 @@ final class Resource {
         this.endpoints = endpoints;
     }
     
-    
 }
