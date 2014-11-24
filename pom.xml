@@ -6,8 +6,11 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
+		<commons-io.version>2.4</commons-io.version>
+		<commons-lang.version>2.6</commons-lang.version>
 		<gson.version>2.3</gson.version>
-		<jrivets-common-version>0.0.3-SNAPSHOT</jrivets-common-version>
+		<jrivets-common.version>0.0.3-SNAPSHOT</jrivets-common.version>
+		<kryo.version>3.0.0</kryo.version>
 		<spark.version>2.0.0</spark.version>
 		<testng.version>6.8</testng.version>
 	</properties>
@@ -22,7 +25,7 @@
 		<dependency>
 			<groupId>org.jrivets</groupId>
 			<artifactId>jrivets-common</artifactId>
-			<version>${jrivets-common-version}</version>
+			<version>${jrivets-common.version}</version>
 		</dependency>
 
 		<dependency>
@@ -30,7 +33,27 @@
 			<artifactId>spark-core</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo-shaded</artifactId>
+			<version>${kryo.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons-lang.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
