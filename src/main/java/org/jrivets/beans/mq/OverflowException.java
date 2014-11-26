@@ -1,4 +1,4 @@
-package org.jrivets.mq;
+package org.jrivets.beans.mq;
 
 public class OverflowException extends Exception {
 

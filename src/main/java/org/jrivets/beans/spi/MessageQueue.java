@@ -1,12 +1,12 @@
-package org.jrivets.mq;
+package org.jrivets.beans.spi;
 
-import java.io.IOException;
+import org.jrivets.beans.mq.OverflowException;
 
 public interface MessageQueue {
 
-    <T> void put(T value) throws OverflowException, IOException;
+    <T> void put(T value) throws OverflowException;
 
-    Object get(long timeoutMs) throws IOException;
+    Object get(long timeoutMs);
 
     /**
      * Terminates the queue content and release all resources borrowed for the

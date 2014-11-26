@@ -1,8 +1,8 @@
 package org.jrivets.beans.api.rest;
 
-import org.jrivets.beans.Operation;
-import org.jrivets.beans.Property;
 import org.jrivets.beans.api.model.TypeScanner;
+import org.jrivets.beans.spi.Operation;
+import org.jrivets.beans.spi.Property;
 import org.testng.annotations.Test;
 
 public class RestInterfaceProviderTest {

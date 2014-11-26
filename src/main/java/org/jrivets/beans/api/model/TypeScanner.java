@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jrivets.beans.Operation;
-import org.jrivets.beans.Property;
+import org.jrivets.beans.spi.Operation;
+import org.jrivets.beans.spi.Property;
 import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
 
