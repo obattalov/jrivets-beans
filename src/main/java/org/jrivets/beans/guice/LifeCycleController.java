@@ -5,36 +5,68 @@ import java.util.Comparator;
 import java.util.Map;
 
 import org.jrivets.beans.spi.LifeCycle;
+import org.jrivets.beans.spi.Service;
 import org.jrivets.collection.SortedArray;
 import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
-import org.jrivets.util.StaticSingleton;
 
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
-public final class LifeCycleController extends StaticSingleton {
+public final class LifeCycleController {
     
-    private static Logger logger = LoggerFactory.getLogger(LifeCycleController.class);
-
-    private static Injector injector;
-    
-    private static SortedArray<LifeCycle> lifeCycles;
-    
-    public static synchronized void setInjector(Injector injector) {
-        if (LifeCycleController.injector != null) {
-            throw new AssertionError("Injector can be initialized only once.");
-        }
-        LifeCycleController.injector = injector;
+    private static class LifeCycleControllerHolder {
+        
+        final static LifeCycleController lcContoller = new LifeCycleController();
+        
     }
     
-    public static synchronized void init() {
+    private final Logger logger = LoggerFactory.getLogger(LifeCycleController.class);
+
+    private Injector injector;
+    
+    private SortedArray<LifeCycle> lifeCycles;
+    
+    private LifeCycleController() {
+        
+    }
+    
+    public static synchronized void setInjector(Injector injector) {
+        if (inst().injector != null) {
+            throw new AssertionError("Injector can be initialized only once.");
+        }
+        inst().injector = injector;
+    }
+    
+    public static void init() {
+        inst().onInit();
+    }
+    
+    public static void destroy() {
+        inst().onDestroy();
+    }
+
+    static LifeCycleController inst() {
+        return LifeCycleControllerHolder.lcContoller;
+    }
+    
+    static void clear() {
+        inst().lifeCycles = null;
+        inst().injector = null;
+    }
+    
+    private synchronized void onInit() {
         if (lifeCycles != null) {
             throw new AssertionError("LifeCycleController can be initialized only once.");
         }
         Map<Key<?>, Binding<?>> bindings = injector.getAllBindings();
         lifeCycles = getLifeCycleInstances(bindings.values());
+        initLifeCycles();
+        startServices();
+    }
+    
+    private void initLifeCycles() {
         logger.info("Initializing ", lifeCycles.size(), " instances.");
         for (LifeCycle lc: lifeCycles) {
             logger.info("init phase=", lc.getPhase());
@@ -42,22 +74,47 @@ public final class LifeCycleController extends StaticSingleton {
         }
     }
     
-    public static synchronized void destroy() {
+    private void startServices() {
+        logger.info("Starting services.");
+        for (LifeCycle lc: lifeCycles) {
+            if (lc instanceof Service) {
+                Service s = (Service) lc;
+                if (s.isAutoStartup()) {
+                    s.start();
+                }
+            }
+        }
+    }
+    
+    private synchronized void onDestroy() {
+        stopServices();
+        destroyLifeCycles();
+        lifeCycles = null;
+    }
+
+    private void stopServices() {
+        logger.info("Stop services");
+        for (int idx = lifeCycles.size() - 1; idx >= 0; idx--) {
+            LifeCycle lc = lifeCycles.get(idx);
+            if (lc instanceof Service) {
+                Service s = (Service) lc;
+                if (s.isStarted()) {
+                    s.stop();
+                }
+            }
+        }
+    }
+    
+    private void destroyLifeCycles() {
         logger.info("Destroying ", lifeCycles.size(), " instances.");
         for (int idx = lifeCycles.size() - 1; idx >= 0; idx--) {
             LifeCycle lc = lifeCycles.get(idx);
             logger.info("destroy phase=", lc.getPhase());
             lc.destroy();
         }
-        lifeCycles = null;
     }
     
-    static void clear() {
-        lifeCycles = null;
-        injector = null;
-    }
-    
-    private static SortedArray<LifeCycle> getLifeCycleInstances(Collection<Binding<?>> bindings) {
+    private SortedArray<LifeCycle> getLifeCycleInstances(Collection<Binding<?>> bindings) {
         IsSingletonBindingScopingVisitor singletonVisitor = new IsSingletonBindingScopingVisitor();
         IsSpecificTypeTargetVisitor lifeCycleVisitor = new IsSpecificTypeTargetVisitor(LifeCycle.class, injector);
         SortedArray<LifeCycle> result = new SortedArray<LifeCycle>(new Comparator<LifeCycle>() {

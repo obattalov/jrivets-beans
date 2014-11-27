@@ -3,6 +3,7 @@ package org.jrivets.beans.guice;
 import javax.inject.Singleton;
 
 import org.jrivets.beans.spi.LifeCycle;
+import org.jrivets.beans.spi.Service;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -92,7 +93,10 @@ public class LifeCycleControllerTest {
 
     interface C4 {};
     
-    static class C4Impl implements C4, LifeCycle {
+    static class C4Impl extends Service implements C4, LifeCycle {
+        
+        boolean autostartup = true;
+        
         @Override
         public void init() {
             assertEquals(2, LifeCycleControllerTest.phase);
@@ -110,6 +114,21 @@ public class LifeCycleControllerTest {
         @Override
         public int getPhase() {
             return 3;
+        }
+
+        @Override
+        public void start() {
+            this.started = true;
+        }
+
+        @Override
+        public void stop() {
+            this.started = false;
+        }
+        
+        @Override
+        public boolean isAutoStartup() {
+            return autostartup;
         }
     }
 
@@ -163,10 +182,28 @@ public class LifeCycleControllerTest {
     @Test
     public void commonCycle() {
         LifeCycleController.setInjector(injector);
+        C4Impl c4impl = (C4Impl) injector.getInstance(C4.class);
+        assertFalse(c4impl.isStarted());
         LifeCycleController.init();
         assertEquals(phase, 3);
+        assertTrue(c4impl.isStarted());
         LifeCycleController.destroy();
+        assertFalse(c4impl.isStarted());
         assertEquals(destroys, 3);
         assertEquals(inits, 3);
+    }
+    
+    @Test
+    public void noAutostartup() {
+        LifeCycleController.setInjector(injector);
+        C4Impl c4impl = (C4Impl) injector.getInstance(C4.class);
+        c4impl.autostartup = false;
+        assertFalse(c4impl.isStarted());
+        LifeCycleController.init();
+        assertFalse(c4impl.isStarted());
+        c4impl.start();
+        assertTrue(c4impl.isStarted());
+        LifeCycleController.destroy();
+        assertFalse(c4impl.isStarted());
     }
 }

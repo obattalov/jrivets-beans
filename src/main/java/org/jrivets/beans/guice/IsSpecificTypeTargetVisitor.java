@@ -30,7 +30,7 @@ class IsSpecificTypeTargetVisitor implements BindingTargetVisitor<Object, Boolea
 
     @Override
     public Boolean visit(ProviderInstanceBinding<?> binding) {
-        return isSubtypeOf(binding.getProviderInstance().get().getClass());
+        return isSubtypeOf(binding.getUserSuppliedProvider().get().getClass());
     }
 
     @Override
