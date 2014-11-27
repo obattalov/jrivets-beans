@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.Map;
 
 import org.jrivets.beans.spi.LifeCycle;
-import org.jrivets.beans.spi.Service;
+import org.jrivets.beans.spi.AbstractService;
 import org.jrivets.collection.SortedArray;
 import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
@@ -77,8 +77,8 @@ public final class LifeCycleController {
     private void startServices() {
         logger.info("Starting services.");
         for (LifeCycle lc: lifeCycles) {
-            if (lc instanceof Service) {
-                Service s = (Service) lc;
+            if (lc instanceof AbstractService) {
+                AbstractService s = (AbstractService) lc;
                 if (s.isAutoStartup()) {
                     s.start();
                 }
@@ -96,8 +96,8 @@ public final class LifeCycleController {
         logger.info("Stop services");
         for (int idx = lifeCycles.size() - 1; idx >= 0; idx--) {
             LifeCycle lc = lifeCycles.get(idx);
-            if (lc instanceof Service) {
-                Service s = (Service) lc;
+            if (lc instanceof AbstractService) {
+                AbstractService s = (AbstractService) lc;
                 if (s.isStarted()) {
                     s.stop();
                 }

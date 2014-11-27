@@ -3,7 +3,7 @@ package org.jrivets.beans.guice;
 import javax.inject.Singleton;
 
 import org.jrivets.beans.spi.LifeCycle;
-import org.jrivets.beans.spi.Service;
+import org.jrivets.beans.spi.AbstractService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -93,7 +93,7 @@ public class LifeCycleControllerTest {
 
     interface C4 {};
     
-    static class C4Impl extends Service implements C4, LifeCycle {
+    static class C4Impl extends AbstractService implements C4, LifeCycle {
         
         boolean autostartup = true;
         

@@ -1,31 +1,12 @@
 package org.jrivets.beans.spi;
 
-public abstract class Service implements LifeCycle {
+public interface Service extends LifeCycle {
     
-    protected boolean started;
-
-    @Override
-    public void init() {
-    }
-
-    @Override
-    public void destroy() {
-    }
+    boolean isAutoStartup();
     
-    public boolean isAutoStartup() {
-        return false;
-    }
+    void start();
     
-    public abstract void start();
+    void stop();
     
-    public abstract void stop();
-    
-    public boolean isStarted() {
-        return started;
-    }
-    
-    @Override
-    public int getPhase() {
-        return Integer.MIN_VALUE;
-    }    
+    boolean isStarted();
 }
