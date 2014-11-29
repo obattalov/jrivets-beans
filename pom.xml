@@ -10,9 +10,11 @@
 		<commons-lang.version>2.6</commons-lang.version>
 		<gson.version>2.3</gson.version>
 		<guava.version>18.0</guava.version>
+		<guice-servlet.version>4.0-beta5</guice-servlet.version>
 		<guice.version>4.0-beta5</guice.version>
 		<jrivets-common.version>0.0.3-SNAPSHOT</jrivets-common.version>
 		<kryo.version>3.0.0</kryo.version>
+		<servlet-api.version>2.5</servlet-api.version>
 		<spark.version>2.0.0</spark.version>
 		<testng.version>6.8</testng.version>
 	</properties>
@@ -28,6 +30,18 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>${servlet-api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.inject.extensions</groupId>
+			<artifactId>guice-servlet</artifactId>
+			<version>${guice-servlet.version}</version>
 		</dependency>
 	
 		<dependency>
@@ -89,7 +103,6 @@
 						<arg>-Xlint:all</arg>
 						<arg>-Werror</arg>
 					</compilerArgs>
-					<compilerArgument>-Xlint:all</compilerArgument>
 				</configuration>
 			</plugin>
 		</plugins>

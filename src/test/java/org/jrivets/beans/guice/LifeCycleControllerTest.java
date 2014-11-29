@@ -2,9 +2,8 @@ package org.jrivets.beans.guice;
 
 import javax.inject.Singleton;
 
-import org.jrivets.beans.spi.LifeCycle;
-import org.jrivets.beans.spi.AbstractService;
-import org.testng.annotations.AfterMethod;
+import org.jrivets.beans.AbstractService;
+import org.jrivets.beans.LifeCycle;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -156,38 +155,28 @@ public class LifeCycleControllerTest {
         LifeCycleControllerTest.phase = 0;
     }
     
-    @AfterMethod
-    public void clean() {
-        LifeCycleController.clear();
-    }
     
     @Test(expectedExceptions={NullPointerException.class})
     public void noInjector() {
-        LifeCycleController.init();
-    }
-    
-    @Test(expectedExceptions={AssertionError.class})
-    public void doubleInjector() {
-        LifeCycleController.setInjector(injector);
-        LifeCycleController.setInjector(injector);
+        new LifeCycleController(null).init();
     }
     
     @Test(expectedExceptions={AssertionError.class})
     public void doubleInit() {
-        LifeCycleController.setInjector(injector);
-        LifeCycleController.init();
-        LifeCycleController.init();
+        LifeCycleController lcController = new LifeCycleController(injector);
+        lcController.init();
+        lcController.init();
     }
     
     @Test
     public void commonCycle() {
-        LifeCycleController.setInjector(injector);
+        LifeCycleController lcController = new LifeCycleController(injector);
         C4Impl c4impl = (C4Impl) injector.getInstance(C4.class);
         assertFalse(c4impl.isStarted());
-        LifeCycleController.init();
+        lcController.init();
         assertEquals(phase, 3);
         assertTrue(c4impl.isStarted());
-        LifeCycleController.destroy();
+        lcController.destroy();
         assertFalse(c4impl.isStarted());
         assertEquals(destroys, 3);
         assertEquals(inits, 3);
@@ -195,15 +184,15 @@ public class LifeCycleControllerTest {
     
     @Test
     public void noAutostartup() {
-        LifeCycleController.setInjector(injector);
+        LifeCycleController lcController = new LifeCycleController(injector);
         C4Impl c4impl = (C4Impl) injector.getInstance(C4.class);
         c4impl.autostartup = false;
         assertFalse(c4impl.isStarted());
-        LifeCycleController.init();
+        lcController.init();
         assertFalse(c4impl.isStarted());
         c4impl.start();
         assertTrue(c4impl.isStarted());
-        LifeCycleController.destroy();
+        lcController.destroy();
         assertFalse(c4impl.isStarted());
     }
 }

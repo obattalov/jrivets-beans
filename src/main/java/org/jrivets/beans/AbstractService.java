@@ -1,4 +1,4 @@
-package org.jrivets.beans.spi;
+package org.jrivets.beans;
 
 public abstract class AbstractService implements Service {
     

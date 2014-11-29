@@ -1,7 +1,7 @@
 package org.jrivets.beans.api.model;
 
-import org.jrivets.beans.spi.Operation;
-import org.jrivets.beans.spi.Property;
+import org.jrivets.beans.Operation;
+import org.jrivets.beans.Property;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

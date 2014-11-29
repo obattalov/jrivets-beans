@@ -1,4 +1,4 @@
-package org.jrivets.beans.spi;
+package org.jrivets.beans;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
