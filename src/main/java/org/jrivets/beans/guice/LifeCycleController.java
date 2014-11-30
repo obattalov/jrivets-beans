@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.jrivets.beans.AbstractService;
 import org.jrivets.beans.LifeCycle;
 import org.jrivets.collection.SortedArray;
@@ -14,6 +17,7 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
+@Singleton
 public final class LifeCycleController {
         
     private final Logger logger = LoggerFactory.getLogger(LifeCycleController.class);
@@ -22,7 +26,9 @@ public final class LifeCycleController {
     
     private SortedArray<LifeCycle> lifeCycles;
     
+    @Inject
     public LifeCycleController(Injector injector) {
+        logger.info("New instance.");
         this.injector = injector;
     }
     
