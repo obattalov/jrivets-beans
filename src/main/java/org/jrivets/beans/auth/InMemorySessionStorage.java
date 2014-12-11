@@ -1,5 +1,7 @@
 package org.jrivets.beans.auth;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -12,7 +14,7 @@ public final class InMemorySessionStorage  implements SessionsStorage {
 
     @Inject
     InMemorySessionStorage(@Named("auth.sessionTimeout") long sessionTimeout) {
-        storage = new InMemoryKeyValueStorage<>("AuthSess", Integer.MAX_VALUE, sessionTimeout*2);
+        storage = new InMemoryKeyValueStorage<>("AuthSess", Integer.MAX_VALUE, TimeUnit.SECONDS.toMillis(sessionTimeout*2));
     }
     
     @Override

@@ -43,6 +43,8 @@ public class BasicAuthFilter implements Filter {
 
     private final String basicRealm;
     
+    private HttpEndpointChecker excludeChecker;
+    
     enum ErrorCode {
         AUTH_REQUIRED("Authentication required"),
         UNKNOWN_AUTH_TYPE("Unknown authentication type"), 
@@ -60,11 +62,14 @@ public class BasicAuthFilter implements Filter {
 
     @Inject
     BasicAuthFilter(SessionService sessionService, BasicAuthenticator basicAuthenticator,
-            @Named("auth.cookieName") String cookieName, @Named("auth.basicRealm") String basicRealm) {
+            @Named("auth.cookieName") String cookieName, 
+            @Named("auth.basicRealm") String basicRealm,
+            @Named("auth.excludedEndpoints") String excludedEndpoints) {
         this.sessionService = sessionService;
         this.basicAuthenticator = basicAuthenticator;
         this.cookieName = cookieName;
         this.basicRealm = basicRealm;
+        this.excludeChecker = new HttpEndpointChecker(excludedEndpoints);
     }
 
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -138,6 +143,6 @@ public class BasicAuthFilter implements Filter {
     }
 
     private boolean authenticationRequired(HttpServletRequest httpRequest) {
-        return true;
+        return excludeChecker.match(httpRequest.getMethod(), httpRequest.getRequestURI()) == null;
     }
 }

@@ -22,6 +22,14 @@ import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
 import org.jrivets.util.UID;
 
+/**
+ * This filter looks for session by cookie and update SecurityContextHolder, if
+ * the session is found. This filter should always be placed before any
+ * AuthFilter, because it clears SecurityContextHolder as #1 thing.
+ * 
+ * @author Dmitry Spasibenko
+ *
+ */
 @Singleton
 public class CookieAuthFilter implements Filter {
 
@@ -44,6 +52,8 @@ public class CookieAuthFilter implements Filter {
             ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        SecurityContextHolder.setContext(null); //clear up context, cause it could come with other session in the thread local.
 
         String cookie = CookieUtils.getCookie(httpRequest, cookieName);
         if (cookie != null) {
