@@ -100,7 +100,7 @@ public final class RestInterfaceProvider {
     public RestInterfaceProvider(Model model, int port, String resourcePrefix) {
         this.model = model;
         this.resPrefix = correctResourcePrefix(resourcePrefix);
-        setPort(port);
+        port(port);
     }
 
     public <T> boolean register(T object, String name) {
