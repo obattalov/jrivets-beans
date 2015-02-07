@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.jrivets.kvstorage.VersionedValue;
 import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
 import org.jrivets.util.UID;
@@ -29,12 +30,13 @@ public final class SessionService {
     }
 
     public Session get(UID sessId) {
-        Session s = sessionsStorage.get(sessId);
-        if (s == null) {
+        VersionedValue<Session> vv = sessionsStorage.get(sessId);
+        if (vv == null) {
             logger.warn("Session ", sessId, " is not found, expired?");
             return null;
         }
 
+        Session s = vv.getValue();
         long now = System.currentTimeMillis();
         if (s.getExpirationTime() < now) {
             logger.info("Session ", sessId, " expired, delete it from the storage");
@@ -44,7 +46,7 @@ public final class SessionService {
         s.setLastTouchTime(now);
         // Do CAS, not PUT, because it can disappear and we would not like to
         // replace it this case
-        return sessionsStorage.cas(s.getId(), s, s) ? s : null;
+        return sessionsStorage.cas(s.getId(), s, vv.getVersion()) > 0 ? s : null;
     }
 
     public Session createNew(BasicAuthInfo aInfo) {
