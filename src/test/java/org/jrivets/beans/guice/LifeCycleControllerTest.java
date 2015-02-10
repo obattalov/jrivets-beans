@@ -155,7 +155,6 @@ public class LifeCycleControllerTest {
         LifeCycleControllerTest.phase = 0;
     }
     
-    
     @Test(expectedExceptions={NullPointerException.class})
     public void noInjector() {
         new LifeCycleController(null).init();
