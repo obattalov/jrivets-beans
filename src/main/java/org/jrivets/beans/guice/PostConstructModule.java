@@ -14,6 +14,12 @@ import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 
+/**
+ * The module adds {@link PostConstruct} annotation processing.
+ * 
+ * @author Dmitry Spasibenko 
+ *
+ */
 public class PostConstructModule extends AbstractModule {
 
     @Override
