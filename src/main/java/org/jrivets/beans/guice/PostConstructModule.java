@@ -39,6 +39,7 @@ public class PostConstructModule extends AbstractModule {
                         encounter.register(new InjectionListener<I>() {
                             public void afterInjection(I injectee) {
                                 try {
+                                    method.setAccessible(true);
                                     method.invoke(injectee);
                                 } catch (InvocationTargetException ie) {
                                     Throwable e = ie.getTargetException();
