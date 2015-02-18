@@ -13,43 +13,21 @@ public final class Session {
     final UID entityId;
     
     final Map<String, Object> attributes = new HashMap<>();
-    
-    final long expirationTimeout;
-    
-    long lastTouchTime;
 
-    Session(UID entityId, long expirationTimeout, long lastTouchTime) {
-        this(new UID(UUID.randomUUID()), entityId, expirationTimeout, lastTouchTime);
+    Session(UID entityId) {
+        this(new UID(UUID.randomUUID()), entityId);
     }
     
-    Session(UID id, UID entityId, long expirationTimeout, long lastTouchTime) {
+    Session(UID id, UID entityId) {
         if (id == null) {
             throw new NullPointerException("Session id cannot be null");
         }
         this.id = id;
         this.entityId = entityId;
-        this.expirationTimeout = expirationTimeout;
-        this.lastTouchTime = lastTouchTime;
-    }
-
-    public long getLastTouchTime() {
-        return lastTouchTime;
-    }
-
-    public void setLastTouchTime(long lastTouchTime) {
-        this.lastTouchTime = lastTouchTime;
     }
 
     public UID getId() {
         return id;
-    }
-
-    public long getExpirationTimeout() {
-        return expirationTimeout;
-    }
-    
-    public long getExpirationTime() {
-        return lastTouchTime + expirationTimeout;
     }
 
     public void setAttribute(String name, Object attr) {
@@ -75,7 +53,6 @@ public final class Session {
 
     @Override
     public String toString() {
-        return "{id=" + id + ", entityId=" + entityId + ", expirationTimeout=" + expirationTimeout
-                + ", lastTouchTime=" + lastTouchTime + "}";
+        return "{id=" + id + ", entityId=" + entityId + "}";
     }
 }

@@ -25,6 +25,7 @@ public abstract class AbstractBasicAuthenticator implements BasicAuthenticator {
      * Checks credentials and provide user information in case of success, or
      * null if the user is not found or password hash doesn't match with
      * expected one.
+     * 
      * @param c - credentials
      * @return
      */
@@ -49,12 +50,22 @@ public abstract class AbstractBasicAuthenticator implements BasicAuthenticator {
      */
     public abstract BasicAuthInfo getByUserName(String username);
 
+    /**
+     * Comparing the strings (hashes) in "length-constant" time ensures that an
+     * attacker cannot extract the hash of a password in an on-line system using
+     * a timing attack, then crack it off-line.
+     * 
+     * @param s1
+     * @param s2
+     * @return
+     */
     public static boolean slowEquals(String s1, String s2) {
         byte[] a = s1.getBytes();
         byte[] b = s2.getBytes();
         int diff = a.length ^ b.length;
-        for (int i = 0; i < a.length && i < b.length; i++)
+        for (int i = 0; i < a.length && i < b.length; i++) {
             diff |= a[i] ^ b[i];
+        }
         return diff == 0;
     }
 }

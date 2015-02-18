@@ -42,34 +42,30 @@ public class BasicAuthFilter implements Filter {
     private final String cookieName;
 
     private final String basicRealm;
-    
-    private HttpEndpointChecker excludeChecker;
-    
+
     enum ErrorCode {
-        AUTH_REQUIRED("Authentication required"),
-        UNKNOWN_AUTH_TYPE("Unknown authentication type"), 
-        UNSUPPORTED_AUTH_METHOD("Unsupported authentication method"), 
-        INVALID_AUTH_TOKEN("Invalid authentication token"),
+        AUTH_REQUIRED("Authentication required"), //
+        UNKNOWN_AUTH_TYPE("Unknown authentication type"), //
+        UNSUPPORTED_AUTH_METHOD("Unsupported authentication method"), //
+        INVALID_AUTH_TOKEN("Invalid authentication token"), //
         BAD_CREDENTIALS("Bad credentials");
-        
+
         final String message;
-        
+
         ErrorCode(String message) {
             this.message = message;
         }
-        
+
     }
 
     @Inject
     BasicAuthFilter(SessionService sessionService, BasicAuthenticator basicAuthenticator,
-            @Named("auth.cookieName") String cookieName, 
-            @Named("auth.basicRealm") String basicRealm,
+            @Named("auth.cookieName") String cookieName, @Named("auth.basicRealm") String basicRealm,
             @Named("auth.excludedEndpoints") String excludedEndpoints) {
         this.sessionService = sessionService;
         this.basicAuthenticator = basicAuthenticator;
         this.cookieName = cookieName;
         this.basicRealm = basicRealm;
-        this.excludeChecker = new HttpEndpointChecker(excludedEndpoints);
     }
 
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -90,11 +86,10 @@ public class BasicAuthFilter implements Filter {
             }
         }
 
-        if (SecurityContextHolder.getContext() == null && authenticationRequired(httpRequest)) {
-            unauthenticated(httpResponse, ErrorCode.AUTH_REQUIRED);
-            return;
-        }
-
+        // at this point the call can be authenticated, or completely not (no
+        // authentication header and session == null), so we propagate the
+        // request to other filters and it is now matter of authorization to
+        // perform it or reject with the settings
         chain.doFilter(request, response);
     }
 
@@ -102,7 +97,8 @@ public class BasicAuthFilter implements Filter {
 
     }
 
-    private ErrorCode doBasicAuthentication(String authHeader, HttpServletResponse httpResponse) throws UnsupportedEncodingException {
+    private ErrorCode doBasicAuthentication(String authHeader, HttpServletResponse httpResponse)
+            throws UnsupportedEncodingException {
         StringTokenizer st = new StringTokenizer(authHeader);
         if (!st.hasMoreTokens()) {
             return ErrorCode.UNKNOWN_AUTH_TYPE;
@@ -113,7 +109,6 @@ public class BasicAuthFilter implements Filter {
             return ErrorCode.UNSUPPORTED_AUTH_METHOD;
         }
 
-        
         String cred = new String(Base64.decodeBase64(st.nextToken()), credentialsCharset);
         int delim = cred.indexOf(":");
         if (delim == -1) {
@@ -135,14 +130,11 @@ public class BasicAuthFilter implements Filter {
     protected String getErrorMessage(ErrorCode errorCode) {
         return errorCode.message;
     }
-    
+
     private void unauthenticated(HttpServletResponse httpResponse, ErrorCode errorCode) throws IOException {
         logger.debug("Unathorized with the message: ", errorCode.message);
         httpResponse.setHeader(Constant.AUTHENTICATE_HEADER, "Basic realm=\"" + basicRealm + "\"");
         httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, getErrorMessage(errorCode));
     }
 
-    private boolean authenticationRequired(HttpServletRequest httpRequest) {
-        return excludeChecker.match(httpRequest.getMethod(), httpRequest.getRequestURI()) == null;
-    }
 }
