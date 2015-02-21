@@ -1,7 +1,5 @@
 package org.jrivets.beans.auth;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import org.jrivets.util.UID;
@@ -11,8 +9,6 @@ public final class Session {
     final UID id;
     
     final UID entityId;
-    
-    final Map<String, Object> attributes = new HashMap<>();
 
     Session(UID entityId) {
         this(new UID(UUID.randomUUID()), entityId);
@@ -26,18 +22,14 @@ public final class Session {
         this.entityId = entityId;
     }
 
+    public UID getEntityId() {
+        return entityId;
+    }
+    
     public UID getId() {
         return id;
     }
-
-    public void setAttribute(String name, Object attr) {
-        attributes.put(name, attr);
-    }
-    
-    public Object getAttribute(String name) {
-        return attributes.get(name);
-    }
-    
+   
     @Override
     public int hashCode() {
         return id.hashCode();
