@@ -7,4 +7,6 @@ public interface SessionService {
     Session get(UID sessId);
 
     Session createNew(BasicAuthInfo aInfo);
+    
+    boolean delete(UID sessId);
 }

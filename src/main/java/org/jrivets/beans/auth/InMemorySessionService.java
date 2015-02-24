@@ -68,4 +68,9 @@ public final class InMemorySessionService implements SessionService {
         storage.put(s);
         return s;
     }
+
+    @Override
+    public boolean delete(UID sessId) {
+        return storage.drop(sessId);
+    }
 }

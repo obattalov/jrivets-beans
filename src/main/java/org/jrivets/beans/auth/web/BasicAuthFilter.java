@@ -4,7 +4,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.jrivets.beans.auth.BasicAuthInfo;
 import org.jrivets.beans.auth.BasicAuthenticator;
 import org.jrivets.beans.auth.Credentials;
-import org.jrivets.beans.auth.SecurityContext;
 import org.jrivets.beans.auth.SecurityContextHolder;
 import org.jrivets.beans.auth.Session;
 import org.jrivets.beans.auth.SessionService;
@@ -60,8 +59,7 @@ public class BasicAuthFilter implements Filter {
 
     @Inject
     BasicAuthFilter(SessionService sessionService, BasicAuthenticator basicAuthenticator,
-            @Named("auth.cookieName") String cookieName, @Named("auth.basicRealm") String basicRealm,
-            @Named("auth.excludedEndpoints") String excludedEndpoints) {
+            @Named("auth.cookieName") String cookieName, @Named("auth.basicRealm") String basicRealm) {
         this.sessionService = sessionService;
         this.basicAuthenticator = basicAuthenticator;
         this.cookieName = cookieName;
@@ -91,6 +89,10 @@ public class BasicAuthFilter implements Filter {
         // request to other filters and it is now matter of authorization to
         // perform it or reject with the settings
         chain.doFilter(request, response);
+        
+        if (SecurityContextHolder.getContext().isAuthRequired()) {
+            unauthenticated(httpResponse, ErrorCode.AUTH_REQUIRED);
+        }
     }
 
     public void destroy() {
@@ -122,7 +124,7 @@ public class BasicAuthFilter implements Filter {
         }
 
         Session session = sessionService.createNew(aInfo);
-        SecurityContextHolder.setContext(new SecurityContext(session));
+        SecurityContextHolder.getContext().setSession(session);
         CookieUtils.setCookie(httpResponse, cookieName, session.getId().toString());
         return null;
     }

@@ -2,7 +2,7 @@ package org.jrivets.beans.auth;
 
 public final class SecurityContext {
 
-    private final Session session;
+    private Session session;
 
     /**
      * the details could be set in context of the security context invocation.
@@ -11,12 +11,17 @@ public final class SecurityContext {
      */
     private Object details;
 
-    public SecurityContext(Session session) {
-        this.session = session;
+    private boolean authRequired;
+    
+    public SecurityContext() {
     }
 
     public Session getSession() {
         return session;
+    }
+    
+    public void setSession(Session session) {
+        this.session = session;
     }
     
     @SuppressWarnings("unchecked")
@@ -28,9 +33,17 @@ public final class SecurityContext {
         this.details = details;
     }
     
+    public boolean isAuthRequired() {
+        return authRequired;
+    }
+
+    public void setAuthRequired(boolean authRequired) {
+        this.authRequired = authRequired;
+    }
+
     @Override
     public String toString() {
-        return "{session=" + session + "}";
+        return "{session=" + session + ", authRequired=" + authRequired + "}";
     }
 
 }
