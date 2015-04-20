@@ -63,8 +63,8 @@ public final class InMemorySessionService implements SessionService {
     }
 
     @Override
-    public Session createNew(BasicAuthInfo aInfo) {
-        Session s = new Session(aInfo.getEntityId());
+    public Session createNew(UID entityId) {
+        Session s = new Session(entityId);
         storage.put(s);
         return s;
     }

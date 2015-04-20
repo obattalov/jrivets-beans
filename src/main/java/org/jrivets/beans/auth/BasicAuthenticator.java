@@ -1,6 +1,8 @@
 package org.jrivets.beans.auth;
 
+import org.jrivets.util.UID;
+
 public interface BasicAuthenticator {
 
-    BasicAuthInfo check(Credentials c);
+    UID check(Credentials c);
 }

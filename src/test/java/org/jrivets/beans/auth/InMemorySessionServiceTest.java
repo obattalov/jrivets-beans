@@ -12,7 +12,7 @@ public class InMemorySessionServiceTest {
     public void putGetTest() {
         InMemorySessionService ss = new InMemorySessionService(100000L);
         UID uid = UID.randomUID();
-        Session s = ss.createNew(new BasicAuthInfo(uid, "salt", "hash"));
+        Session s = ss.createNew(uid);
         assertNotEquals(s.getId(), uid);
         assertEquals(s.entityId, uid);
         Session s2 = ss.get(s.getId());
@@ -24,7 +24,7 @@ public class InMemorySessionServiceTest {
     public void expirationTest() {
         InMemorySessionService ss = new InMemorySessionService(1L);
         UID uid = UID.randomUID();
-        Session s = ss.createNew(new BasicAuthInfo(uid, "salt", "hash"));
+        Session s = ss.createNew(uid);
         assertNotEquals(s.getId(), uid);
         assertEquals(s.entityId, uid);
         SyncUtils.sleepQuietly(1010L);
