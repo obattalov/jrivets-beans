@@ -36,7 +36,7 @@ public final class InMemorySessionService implements SessionService {
             try {
                 newSession = session;
                 if (getValue(session.getId()) != session) {
-                    logger.error("Something goes wrong - cannot strore session into the storage");
+                    logger.error("Something goes wrong - cannot store session into the storage");
                     throw new IllegalStateException("Cannot store session into InMemoryStorage");
                 }
             } finally {

@@ -66,7 +66,6 @@ public class CookieAuthFilter implements Filter {
             } else {
                 logger.debug("Unset cookie ", cookieName, "=", cookie, " , no session for it.");
                 CookieUtils.deleteCookie(httpResponse, cookieName);
-                sessionId = null;
             }
         }
         
