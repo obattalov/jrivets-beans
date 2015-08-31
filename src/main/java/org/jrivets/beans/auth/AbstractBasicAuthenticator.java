@@ -3,7 +3,6 @@ package org.jrivets.beans.auth;
 import java.util.function.BiFunction;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.jrivets.util.UID;
 
 public abstract class AbstractBasicAuthenticator implements BasicAuthenticator {
 
@@ -31,13 +30,13 @@ public abstract class AbstractBasicAuthenticator implements BasicAuthenticator {
      * @return entityID, if authenticated
      */
     @Override
-    public UID check(Credentials c) {
+    public BasicAuthInfo check(Credentials c) {
         BasicAuthInfo aInfo = getByUserName(c.getLogin());
         if (aInfo == null) {
             return null;
         }
         if (slowEquals(hashFunction.apply(aInfo.getSalt(), c), aInfo.getHash())) {
-            return aInfo.getEntityId();
+            return aInfo;
         }
         return null;
     }

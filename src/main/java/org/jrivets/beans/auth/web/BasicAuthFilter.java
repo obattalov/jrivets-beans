@@ -1,6 +1,7 @@
 package org.jrivets.beans.auth.web;
 
 import org.apache.commons.codec.binary.Base64;
+import org.jrivets.beans.auth.BasicAuthInfo;
 import org.jrivets.beans.auth.BasicAuthenticator;
 import org.jrivets.beans.auth.Credentials;
 import org.jrivets.beans.auth.SecurityContextHolder;
@@ -8,7 +9,6 @@ import org.jrivets.beans.auth.Session;
 import org.jrivets.beans.auth.SessionService;
 import org.jrivets.beans.web.Constant;
 import org.jrivets.log.LoggerFactory;
-import org.jrivets.util.UID;
 
 import com.google.inject.Singleton;
 
@@ -88,13 +88,14 @@ public class BasicAuthFilter extends AuthFilter {
         }
 
         Credentials c = new Credentials(cred.substring(0, delim).trim(), cred.substring(delim + 1).trim());
-        UID entityId = basicAuthenticator.check(c);
-        if (entityId == null) {
+        BasicAuthInfo bai = basicAuthenticator.check(c);
+        if (bai == null) {
             return ErrorCode.BAD_CREDENTIALS;
         }
 
-        Session session = sessionService.createNew(entityId);
+        Session session = sessionService.createNew(bai.getEntityId());
         SecurityContextHolder.getContext().setSession(session);
+        SecurityContextHolder.getContext().setDetails(bai.getEntity());
         CookieUtils.setCookie(httpResponse, cookieName, session.getId().toString());
         return null;
     }
